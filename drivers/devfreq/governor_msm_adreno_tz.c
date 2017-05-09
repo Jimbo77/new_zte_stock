@@ -231,6 +231,17 @@ static int __secure_tz_reset_entry2(unsigned int *scm_data, u32 size_scm_data,
 	return ret;
 }
 
+static int __secure_tz_entry2(u32 cmd, u32 val1, u32 val2)
+{
+	int ret;
+	spin_lock(&tz_lock);
+	/* sync memory before sending the commands to tz*/
+	__iowmb();
+	ret = scm_call_atomic2(SCM_SVC_IO, cmd, val1, val2);
+	spin_unlock(&tz_lock);
+	return ret;
+}
+
 static int __secure_tz_update_entry3(unsigned int *scm_data, u32 size_scm_data,
 		int *val, u32 size_val, struct devfreq_msm_adreno_tz_data *priv)
 {
@@ -413,7 +424,7 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 	 * Force to use & record as min freq when system has
 	 * entered pm-suspend or screen-off state.
 	 */
-	if (suspended || power_suspended) {
+	if (suspended /*|| power_suspended*/) {
 		*freq = devfreq->profile->freq_table[devfreq->profile->max_state - 1];
 		return 0;
 	}
