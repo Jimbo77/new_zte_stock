@@ -1937,9 +1937,7 @@ static void
 low_wmark_func(struct work_struct *dummy)
 {
 	reset_low_wmark_max_freq();
-	if (freq_mitigation_task) {
-		complete(&freq_mitigation_complete);
-	}
+	complete(&freq_mitigation_complete);
 	if (low_wmark_max_freq) {
 		schedule_delayed_work(&low_wmark_work, WMARD_DELAY);
 	}
@@ -1967,9 +1965,7 @@ app_max_freq_limit_store(struct device *dev, struct device_attribute *attr,
 		return -EINVAL;
 	low_wmark_max_freq = max;
 	low_wmark_max_freq_jiffies = jiffies;
-	if (freq_mitigation_task) {
-		complete(&freq_mitigation_complete);
-	}
+	complete(&freq_mitigation_complete);
 	schedule_delayed_work(&low_wmark_work, WMARD_DELAY);
 	return count;
 }
@@ -2928,7 +2924,7 @@ static void __ref do_core_control(long temp)
 				cpu_dev = get_cpu_device(i);
 				trace_thermal_pre_core_offline(i);
 				ret = device_offline(cpu_dev);
-				if (ret < 0)
+				if (ret)
 					pr_err("Error %d offline core %d\n",
 					       ret, i);
 				trace_thermal_post_core_offline(i,
@@ -3001,8 +2997,7 @@ static int __ref update_offline_cores(int val)
 			cpu_dev = get_cpu_device(cpu);
 			trace_thermal_pre_core_offline(cpu);
 			ret = device_offline(cpu_dev);
-			if (ret < 0) {
-				cpus_offlined &= ~BIT(cpu);
+			if (ret) {
 				pr_err_ratelimited(
 					"Unable to offline CPU%d. err:%d\n",
 					cpu, ret);
@@ -3072,14 +3067,6 @@ static __ref int do_hotplug(void *data)
 			&hotplug_notify_complete) != 0)
 			;
 		reinit_completion(&hotplug_notify_complete);
-
-		/*
-		 * Suspend framework will have disabled the
-		 * hotplug functionality. So wait till the suspend exits
-		 * and then re-evaluate.
-		 */
-		if (in_suspend)
-			continue;
 		mask = 0;
 
 		mutex_lock(&core_control_mutex);
