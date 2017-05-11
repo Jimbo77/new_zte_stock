@@ -64,7 +64,7 @@ static void log_modem_sfr(void)
 	strlcpy(reason, smem_reason, min(size, MAX_SSR_REASON_LEN));
 	pr_err("modem subsystem failure reason: %s.\n", reason);
 
-	modem_fatal_error_update_reason(smem_reason);
+	/*modem_fatal_error_update_reason(smem_reason);*/
 
 	smem_reason[0] = '\0';
 	wmb();
