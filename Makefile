@@ -2,7 +2,7 @@ VERSION = 3
 PATCHLEVEL = 18
 SUBLEVEL = 48
 EXTRAVERSION =
-NAME = AX7.STOCK.R20
+NAME = AX7.STOCK.R21
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
